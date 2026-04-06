@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=69.5.1", "wheel>=0.43.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gptq-llm-project"
+version = "0.1.0"
+description = "gptq-LLM-Project: a production-grade LLM Quality Observatory."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "Omkar" }
+]
+dependencies = [
+  "accelerate==1.6.0",
+  "auto-gptq==0.7.1",
+  "fastapi==0.115.12",
+  "httpx==0.28.1",
+  "mlflow-skinny==2.22.0",
+  "numpy==2.2.4",
+  "pandas==2.2.3",
+  "pynvml==12.0.0",
+  "prometheus-client==0.21.1",
+  "pydantic==2.11.3",
+  "pydantic-settings==2.8.1",
+  "python-dotenv==1.0.1",
+  "pyyaml==6.0.2",
+  "rouge-score==0.1.2",
+  "tenacity==9.1.2",
+  "transformers==4.51.3",
+  "vllm==0.8.5.post1",
+  "uvicorn[standard]==0.34.2"
+]
+
+[project.optional-dependencies]
+dev = [
+  "black==25.1.0",
+  "isort==6.0.1",
+  "mypy==1.15.0",
+  "pytest==8.3.5",
+  "pytest-cov==6.1.1",
+  "types-PyYAML==6.0.12.20250402"
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["mizan", "config"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+pretty = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["mizan*", "config*"]

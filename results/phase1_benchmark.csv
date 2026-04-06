@@ -1,0 +1,2 @@
+max_num_batched_tokens,concurrent_requests,gpu_memory_utilization,kv_cache_dtype,dtype,quantization,avg_ttft_ms,avg_itl_ms,throughput_tokens_per_sec,peak_vram_mb
+512,4,0.99,auto,float16,gptq,245.3743,23.5052,30.3538,8089.207
