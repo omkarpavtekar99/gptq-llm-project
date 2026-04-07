@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 ENV_FILE := $(if $(wildcard .env),.env,.env.example)
 
-.PHONY: install test lint serve benchmark-phase1 dashboard
+.PHONY: install test lint serve benchmark-phase1 benchmark-phase2 dashboard
 
 install:
 	pip install -e ".[dev]"
@@ -27,6 +27,9 @@ serve:
 
 benchmark-phase1:
 	python scripts/benchmark_phase1.py
+
+benchmark-phase2:
+	python scripts/benchmark_phase2.py
 
 dashboard:
 	@echo "Phase 6 only: run 'docker compose up -d' after monitoring files are added."

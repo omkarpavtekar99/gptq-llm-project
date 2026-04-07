@@ -159,3 +159,70 @@ python scripts/benchmark_phase1.py --manage-server
 - `results/phase1_benchmark.csv`: one row per sweep combination with TTFT, ITL, throughput, and peak VRAM
 - `results/phase1_summary.md`: the chosen config, quantization comparison, and lock-in recommendation
 - MLflow artifacts and metrics under the `mizan` experiment
+
+## Phase 2
+
+Phase 2 adds a hardware-aware speech pipeline for VAD, ASR, diarization, and optional TTS. The implementation uses lazy loading and optional runtime checks so your WSL setup only pays for the stage you actually invoke.
+
+### Included in this phase
+
+- `mizan/speech/vad.py`: Silero VAD wrapper with energy gating and short-gap merging
+- `mizan/speech/asr.py`: faster-whisper wrapper with streamed transcript chunks, WER scoring, and MLflow latency logging
+- `mizan/speech/diarization.py`: pyannote diarization wrapper with RTTM export and DER scoring
+- `mizan/speech/tts.py`: Kokoro TTS wrapper with P50/P95/P99 streaming latency tracking
+- `mizan/speech/pipeline.py`: unified `SpeechPipeline` chaining VAD → ASR → Diarization → optional TTS
+- `mizan/speech/benchmarking.py`: manifest-driven benchmark orchestration
+- `scripts/benchmark_phase2.py`: CLI entrypoint writing the CSV and Markdown report
+
+The audio loader uses `soundfile` first so it can read WAV variants that Python's built-in `wave` module rejects, including extensible WAV files.
+
+### Install Phase 2 dependencies
+
+```bash
+source ~/mizan-env/bin/activate
+cd /mnt/c/Users/omkar/OneDrive/Documents/New\ project/mizan_project
+pip install -e ".[dev]"
+```
+
+If you plan to use pyannote diarization, export your Hugging Face token through `.env`:
+
+```bash
+DIARIZATION__HF_TOKEN=your_token_here
+```
+
+`pyannote.audio` is pinned to the 3.1.1 line here because the newer 4.x releases require a newer `opentelemetry-sdk` than the one allowed by the current `vllm==0.8.5.post1` stack.
+
+### Prepare the benchmark manifest
+
+Copy the example manifest and point it at your 10-file evaluation set:
+
+```bash
+cp data/phase2_benchmark_manifest.example.json data/phase2_benchmark_manifest.json
+```
+
+Each manifest entry should include:
+
+- `sample_id`
+- `audio_path`
+- `reference_transcript`
+- `reference_rttm_path` when DER should be measured
+
+Relative `audio_path` and `reference_rttm_path` values are resolved from the manifest file’s own folder.
+
+### Run the Phase 2 benchmark
+
+```bash
+python scripts/benchmark_phase2.py
+```
+
+Or with the Make target:
+
+```bash
+make benchmark-phase2
+```
+
+### Outputs
+
+- `results/phase2_speech_benchmark.csv`: one row per sample/model pair with WER, DER, latency, and VRAM delta
+- `results/phase2_summary.md`: model-level averages and the recommended Whisper profile
+- MLflow nested runs under the main project experiment

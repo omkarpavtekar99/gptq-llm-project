@@ -22,6 +22,10 @@ class PathsConfig(BaseModel):
     shadow_db_path: Path = Field(default=Path("data/shadow_log.db"))
     phase1_benchmark_csv: Path = Field(default=Path("results/phase1_benchmark.csv"))
     phase1_summary_md: Path = Field(default=Path("results/phase1_summary.md"))
+    phase2_benchmark_manifest: Path = Field(default=Path("data/phase2_benchmark_manifest.json"))
+    phase2_benchmark_csv: Path = Field(default=Path("results/phase2_speech_benchmark.csv"))
+    phase2_summary_md: Path = Field(default=Path("results/phase2_summary.md"))
+    speech_output_dir: Path = Field(default=Path("results/speech"))
 
     @model_validator(mode="after")
     def resolve_relative_paths(self) -> "PathsConfig":
@@ -38,6 +42,10 @@ class PathsConfig(BaseModel):
         self.shadow_db_path = self._resolve_from_root(root, self.shadow_db_path)
         self.phase1_benchmark_csv = self._resolve_from_root(root, self.phase1_benchmark_csv)
         self.phase1_summary_md = self._resolve_from_root(root, self.phase1_summary_md)
+        self.phase2_benchmark_manifest = self._resolve_from_root(root, self.phase2_benchmark_manifest)
+        self.phase2_benchmark_csv = self._resolve_from_root(root, self.phase2_benchmark_csv)
+        self.phase2_summary_md = self._resolve_from_root(root, self.phase2_summary_md)
+        self.speech_output_dir = self._resolve_from_root(root, self.speech_output_dir)
         return self
 
     @staticmethod
@@ -134,6 +142,9 @@ class VadConfig(BaseModel):
     threshold: float = Field(default=0.50)
     min_silence_ms: int = Field(default=250)
     energy_gate_db: float = Field(default=-40.0)
+    sampling_rate: int = Field(default=16000)
+    min_speech_duration_ms: int = Field(default=100)
+    speech_pad_ms: int = Field(default=30)
 
 
 class AsrConfig(BaseModel):
@@ -142,6 +153,19 @@ class AsrConfig(BaseModel):
     model_size: str = Field(default="medium")
     device: str = Field(default="cuda")
     compute_type: str = Field(default="float16")
+    language: str = Field(default="en")
+    beam_size: int = Field(default=5)
+    batch_size: int = Field(default=8)
+    benchmark_model_sizes: list[str] = Field(default_factory=lambda: ["medium", "large-v3"])
+
+    @field_validator("benchmark_model_sizes", mode="before")
+    @classmethod
+    def _parse_string_list(cls, value: object) -> object:
+        """Parse comma-separated string lists from environment values."""
+
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
+        return value
 
 
 class DiarizationConfig(BaseModel):
@@ -149,6 +173,8 @@ class DiarizationConfig(BaseModel):
 
     model_name: str = Field(default="pyannote/speaker-diarization-3.1")
     hf_token: str = Field(default="")
+    min_speakers: int | None = Field(default=None)
+    max_speakers: int | None = Field(default=None)
 
 
 class TtsConfig(BaseModel):
@@ -157,6 +183,9 @@ class TtsConfig(BaseModel):
     model_name: str = Field(default="kokoro")
     voice: str = Field(default="af_bella")
     stream_chunk_size: int = Field(default=1024)
+    lang_code: str = Field(default="a")
+    speed: float = Field(default=1.0)
+    sample_rate: int = Field(default=24000)
 
 
 class RoutingConfig(BaseModel):
@@ -217,6 +246,7 @@ class Settings(BaseSettings):
             self.paths.prompt_dir,
             self.paths.golden_set_dir,
             self.paths.baseline_dir,
+            self.paths.speech_output_dir,
             self.rag.chroma_persist_dir,
         )
         for directory in directories:

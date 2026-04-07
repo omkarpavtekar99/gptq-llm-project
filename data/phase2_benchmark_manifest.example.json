@@ -1,0 +1,9 @@
+[
+  {
+    "sample_id": "sample-001",
+    "audio_path": "audio/sample-001.wav",
+    "reference_transcript": "Replace this line with the ground-truth transcript for sample 001.",
+    "reference_rttm_path": "audio/sample-001.rttm",
+    "notes": "Copy this file to data/phase2_benchmark_manifest.json and point it at your 10-file evaluation set."
+  }
+]

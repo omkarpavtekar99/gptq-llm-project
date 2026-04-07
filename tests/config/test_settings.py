@@ -45,14 +45,25 @@ def test_ensure_directories_creates_expected_paths(monkeypatch: object, tmp_path
 
 
 def test_phase1_sweep_lists_parse_from_env(monkeypatch: object) -> None:
-    """Comma-separated Phase 1 sweep values should parse into numeric lists."""
+    """JSON-array Phase 1 sweep values should parse into numeric lists."""
 
-    monkeypatch.setenv("VLLM__SWEEP_BATCHED_TOKENS", "512,1024,2048")
-    monkeypatch.setenv("VLLM__SWEEP_CONCURRENCY", "1,4,8")
-    monkeypatch.setenv("VLLM__SWEEP_GPU_MEMORY_UTILIZATION", "0.80,0.85,0.90")
+    monkeypatch.setenv("VLLM__SWEEP_BATCHED_TOKENS", "[512,1024,2048]")
+    monkeypatch.setenv("VLLM__SWEEP_CONCURRENCY", "[1,4,8]")
+    monkeypatch.setenv("VLLM__SWEEP_GPU_MEMORY_UTILIZATION", "[0.80,0.85,0.90]")
 
     settings = Settings()
 
     assert settings.vllm.sweep_batched_tokens == [512, 1024, 2048]
     assert settings.vllm.sweep_concurrency == [1, 4, 8]
     assert settings.vllm.sweep_gpu_memory_utilization == [0.8, 0.85, 0.9]
+
+
+def test_phase2_paths_resolve_from_project_root(monkeypatch: object, tmp_path: Path) -> None:
+    """Phase 2 output paths should resolve from the configured project root."""
+
+    monkeypatch.setenv("PATHS__PROJECT_ROOT", str(tmp_path))
+    monkeypatch.setenv("PATHS__PHASE2_BENCHMARK_MANIFEST", "data/phase2_benchmark_manifest.json")
+
+    settings = Settings()
+
+    assert settings.paths.phase2_benchmark_manifest == tmp_path / "data/phase2_benchmark_manifest.json"

@@ -1,0 +1,9 @@
+[
+  {
+    "sample_id": "smoke-001",
+    "audio_path": "audio/test-44100Hz-le-1ch-4bytes.wav",
+    "reference_transcript": "",
+    "reference_rttm_path": null,
+    "notes": "Smoke test only."
+  }
+]
