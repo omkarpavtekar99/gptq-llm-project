@@ -192,6 +192,10 @@ DIARIZATION__HF_TOKEN=your_token_here
 
 `pyannote.audio` is pinned to the 3.1.1 line here because the newer 4.x releases require a newer `opentelemetry-sdk` than the one allowed by the current `vllm==0.8.5.post1` stack.
 
+`transformers` is intentionally kept as a compatible 4.x range instead of an exact pin so the eval stack can resolve alongside `vllm`, `sentence-transformers`, and the other Phase 3 packages without breaking the serving path.
+
+ChromaDB is pinned to the newer 1.5.6 line because the older 0.5.x releases cap `tokenizers` below the version required by `vllm==0.8.5.post1`.
+
 ### Prepare the benchmark manifest
 
 Copy the example manifest and point it at your 10-file evaluation set:
@@ -226,3 +230,68 @@ make benchmark-phase2
 - `results/phase2_speech_benchmark.csv`: one row per sample/model pair with WER, DER, latency, and VRAM delta
 - `results/phase2_summary.md`: model-level averages and the recommended Whisper profile
 - MLflow nested runs under the main project experiment
+
+## Phase 3
+
+Phase 3 adds the evaluation framework: immutable golden sets, a versioned prompt registry, ROUGE-L and BERTScore scoring, Qwen-as-judge scoring through the local vLLM endpoint, a regression harness, optional RAG evaluation, and online shadow evaluation logging.
+
+### Included in this phase
+
+- `mizan/eval/golden_sets.py`: JSON-backed immutable golden set storage
+- `mizan/eval/prompt_registry.py`: YAML-backed versioned prompt templates with diff support
+- `mizan/eval/engine.py`: generation, ROUGE-L, BERTScore, judge scoring, error taxonomy, and MLflow logging
+- `mizan/eval/rag_eval.py`: public-domain sample corpus bootstrap, ChromaDB indexing, and RAGAS scoring
+- `mizan/eval/regression.py`: baseline persistence and threshold checks
+- `mizan/eval/shadow.py`: FastAPI middleware for 10% asynchronous shadow evaluation and SQLite logging
+- `tests/test_regression.py`: regression harness with `--update-baseline`
+
+### Install Phase 3 dependencies
+
+```bash
+source ~/mizan-env/bin/activate
+cd /mnt/c/Users/omkar/OneDrive/Documents/New\ project/mizan_project
+pip install -e ".[dev]"
+```
+
+### Golden sets and prompt templates
+
+The repo now includes:
+
+- `data/golden_sets/core_eval__1.0.0.json`
+- `config/prompts/judge_response__1.0.0.yaml`
+- `data/baselines/regression_baseline.json`
+
+You can publish additional golden sets with `GoldenSetStore.publish()` and prompt versions with `PromptRegistry.save()`. Published versions are immutable.
+
+### Run the regression harness
+
+To refresh the baseline:
+
+```bash
+pytest tests/test_regression.py -v --update-baseline
+```
+
+To validate against the stored baseline:
+
+```bash
+pytest tests/test_regression.py -v
+```
+
+### RAG evaluation notes
+
+The `RagEvaluator` writes a 20-document public-domain sample corpus under `data/rag_docs/` and uses:
+
+- `sentence-transformers/all-MiniLM-L6-v2` for embeddings
+- ChromaDB as the local vector store
+- RAGAS for `faithfulness`, `answer_relevancy`, `context_precision`, and `context_recall`
+
+### Shadow evaluation
+
+Attach `ShadowEvaluationMiddleware` to a FastAPI app with a shared `EvalEngine` instance. The middleware samples 10% of requests by default, scores them asynchronously, writes results to MLflow, and appends them to `data/shadow_log.db`.
+
+### Outputs
+
+- MLflow eval runs under the shared experiment
+- `data/baselines/regression_baseline.json`: stored regression baseline
+- `data/shadow_log.db`: local shadow-eval log database
+- Chroma persistence under `data/chroma/`

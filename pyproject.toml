@@ -15,6 +15,8 @@ authors = [
 dependencies = [
   "accelerate==1.6.0",
   "auto-gptq==0.7.1",
+  "bert-score==0.3.13",
+  "chromadb==1.5.6",
   "fastapi==0.115.12",
   "faster-whisper==1.2.1",
   "httpx==0.28.1",
@@ -31,11 +33,13 @@ dependencies = [
   "pydantic-settings==2.8.1",
   "python-dotenv==1.0.1",
   "pyyaml==6.0.2",
+  "ragas==0.3.2",
   "rouge-score==0.1.2",
+  "sentence-transformers==5.1.0",
   "silero-vad==6.2.1",
   "soundfile==0.13.1",
   "tenacity==9.1.2",
-  "transformers==4.51.3",
+  "transformers>=4.51.3,<5.0.0",
   "vllm==0.8.5.post1",
   "uvicorn[standard]==0.34.2"
 ]

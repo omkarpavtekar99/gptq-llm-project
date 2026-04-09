@@ -26,6 +26,8 @@ class PathsConfig(BaseModel):
     phase2_benchmark_csv: Path = Field(default=Path("results/phase2_speech_benchmark.csv"))
     phase2_summary_md: Path = Field(default=Path("results/phase2_summary.md"))
     speech_output_dir: Path = Field(default=Path("results/speech"))
+    regression_baseline_path: Path = Field(default=Path("data/baselines/regression_baseline.json"))
+    rag_docs_dir: Path = Field(default=Path("data/rag_docs"))
 
     @model_validator(mode="after")
     def resolve_relative_paths(self) -> "PathsConfig":
@@ -46,6 +48,8 @@ class PathsConfig(BaseModel):
         self.phase2_benchmark_csv = self._resolve_from_root(root, self.phase2_benchmark_csv)
         self.phase2_summary_md = self._resolve_from_root(root, self.phase2_summary_md)
         self.speech_output_dir = self._resolve_from_root(root, self.speech_output_dir)
+        self.regression_baseline_path = self._resolve_from_root(root, self.regression_baseline_path)
+        self.rag_docs_dir = self._resolve_from_root(root, self.rag_docs_dir)
         return self
 
     @staticmethod
@@ -134,6 +138,22 @@ class ThresholdConfig(BaseModel):
     hallucination_max_rate: float = Field(default=0.05)
     drift_alert_delta: float = Field(default=0.05)
     request_timeout_sec: float = Field(default=5.0)
+    rouge_drop_tolerance: float = Field(default=0.10)
+
+
+class EvalConfig(BaseModel):
+    """Evaluation framework settings."""
+
+    judge_model_name: str = Field(default="Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4")
+    judge_temperature: float = Field(default=0.0)
+    judge_timeout_sec: float = Field(default=60.0)
+    judge_max_tokens: int = Field(default=256)
+    bertscore_model_type: str = Field(default="distilbert-base-uncased")
+    shadow_sample_rate: float = Field(default=0.10)
+    shadow_table_name: str = Field(default="shadow_evaluations")
+    rag_collection_name: str = Field(default="phase3_rag_docs")
+    rag_top_k: int = Field(default=3)
+    rag_rebuild_index: bool = Field(default=False)
 
 
 class VadConfig(BaseModel):
@@ -211,6 +231,7 @@ class Settings(BaseSettings):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     vllm: VllmConfig = Field(default_factory=VllmConfig)
     mlflow: MlflowConfig = Field(default_factory=MlflowConfig)
+    eval: EvalConfig = Field(default_factory=EvalConfig)
     prometheus: PrometheusConfig = Field(default_factory=PrometheusConfig)
     thresholds: ThresholdConfig = Field(default_factory=ThresholdConfig)
     vad: VadConfig = Field(default_factory=VadConfig)
@@ -247,6 +268,7 @@ class Settings(BaseSettings):
             self.paths.golden_set_dir,
             self.paths.baseline_dir,
             self.paths.speech_output_dir,
+            self.paths.rag_docs_dir,
             self.rag.chroma_persist_dir,
         )
         for directory in directories:

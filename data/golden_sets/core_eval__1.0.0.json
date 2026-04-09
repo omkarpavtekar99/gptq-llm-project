@@ -1,0 +1,44 @@
+{
+  "name": "core_eval",
+  "version": "1.0.0",
+  "entries": [
+    {
+      "id": "core-001",
+      "prompt": "Define time to first token in one sentence.",
+      "expected_output": "Time to first token is the delay between sending a request and receiving the first generated token.",
+      "tags": {
+        "domain": "serving",
+        "difficulty": "easy",
+        "length": "short"
+      },
+      "version": "1.0.0",
+      "created_at": "2026-04-08T00:00:00+00:00"
+    },
+    {
+      "id": "core-002",
+      "prompt": "Explain why batching improves throughput for LLM serving.",
+      "expected_output": "Batching improves throughput by letting the GPU process multiple requests together and reducing per-request overhead.",
+      "tags": {
+        "domain": "serving",
+        "difficulty": "medium",
+        "length": "medium"
+      },
+      "version": "1.0.0",
+      "created_at": "2026-04-08T00:00:00+00:00"
+    },
+    {
+      "id": "core-003",
+      "prompt": "What is voice activity detection used for in a speech pipeline?",
+      "expected_output": "Voice activity detection identifies speech regions so downstream ASR only processes segments that contain speech.",
+      "tags": {
+        "domain": "speech",
+        "difficulty": "easy",
+        "length": "short"
+      },
+      "version": "1.0.0",
+      "created_at": "2026-04-08T00:00:00+00:00"
+    }
+  ],
+  "created_at": "2026-04-08T00:00:00+00:00",
+  "source_path": null
+}
