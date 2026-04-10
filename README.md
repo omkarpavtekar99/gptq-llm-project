@@ -295,3 +295,38 @@ Attach `ShadowEvaluationMiddleware` to a FastAPI app with a shared `EvalEngine` 
 - `data/baselines/regression_baseline.json`: stored regression baseline
 - `data/shadow_log.db`: local shadow-eval log database
 - Chroma persistence under `data/chroma/`
+
+## Phase 4
+
+Phase 4 adds drift detection and root-cause analysis around the Phase 3 evaluation outputs. The detector embeds eval outputs, compares them against a stored baseline, emits alert metadata, and provides a simulation path to demonstrate the signal firing on a prompt regression.
+
+### Included in this phase
+
+- `mizan/analysis/models.py`: drift and RCA report models
+- `mizan/analysis/drift.py`: embedding baseline generation, JS divergence, cosine drift, rolling judge score, and alert logic
+- `mizan/analysis/rca.py`: prompt-version, model-variant, and retrieval-config comparison helpers
+- `scripts/simulate_drift.py`: baseline run, intentional prompt degradation, drift detection, and RCA output
+
+### Baseline files
+
+- `data/baselines/drift_baseline.pkl`: persisted embedding baseline written by `DriftDetector.recompute_baseline()`
+- `results/phase4_drift_simulation.md`: simulation output written by `scripts/simulate_drift.py`
+
+### Run the Phase 4 tests
+
+```bash
+pytest tests/analysis -v
+```
+
+### Run the drift simulation
+
+Make sure your local vLLM server is running first, then:
+
+```bash
+python scripts/simulate_drift.py
+```
+
+### Outputs
+
+- MLflow drift metrics and serialized report payloads
+- `results/phase4_drift_simulation.md`: human-readable simulation summary

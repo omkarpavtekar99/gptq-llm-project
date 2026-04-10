@@ -1,0 +1,9 @@
+name: judge_response
+version: 1.1.0
+content: Maybe respond however you want. The score can be vague. Whatever seems fine.
+author: omkar
+task_type: evaluation
+created_at: '2026-04-08T00:00:00Z'
+tags:
+- judge
+- eval

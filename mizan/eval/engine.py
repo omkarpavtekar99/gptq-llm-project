@@ -92,6 +92,7 @@ class EvalEngine:
             prompt=entry.prompt,
             expected_output=entry.expected_output,
             actual_output=response_text,
+            tags=entry.tags,
             rouge_l=rouge_l,
             bertscore_f1=bertscore_f1,
             judge=judge,

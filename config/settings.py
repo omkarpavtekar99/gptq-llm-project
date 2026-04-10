@@ -28,6 +28,8 @@ class PathsConfig(BaseModel):
     speech_output_dir: Path = Field(default=Path("results/speech"))
     regression_baseline_path: Path = Field(default=Path("data/baselines/regression_baseline.json"))
     rag_docs_dir: Path = Field(default=Path("data/rag_docs"))
+    drift_baseline_path: Path = Field(default=Path("data/baselines/drift_baseline.pkl"))
+    phase4_simulation_md: Path = Field(default=Path("results/phase4_drift_simulation.md"))
 
     @model_validator(mode="after")
     def resolve_relative_paths(self) -> "PathsConfig":
@@ -50,6 +52,8 @@ class PathsConfig(BaseModel):
         self.speech_output_dir = self._resolve_from_root(root, self.speech_output_dir)
         self.regression_baseline_path = self._resolve_from_root(root, self.regression_baseline_path)
         self.rag_docs_dir = self._resolve_from_root(root, self.rag_docs_dir)
+        self.drift_baseline_path = self._resolve_from_root(root, self.drift_baseline_path)
+        self.phase4_simulation_md = self._resolve_from_root(root, self.phase4_simulation_md)
         return self
 
     @staticmethod
@@ -154,6 +158,7 @@ class EvalConfig(BaseModel):
     rag_collection_name: str = Field(default="phase3_rag_docs")
     rag_top_k: int = Field(default=3)
     rag_rebuild_index: bool = Field(default=False)
+    rolling_judge_window_days: int = Field(default=7)
 
 
 class VadConfig(BaseModel):

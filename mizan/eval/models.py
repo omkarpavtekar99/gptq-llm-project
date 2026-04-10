@@ -76,6 +76,7 @@ class EvalResult(BaseModel):
     prompt: str
     expected_output: str
     actual_output: str
+    tags: dict[str, str] = Field(default_factory=dict)
     rouge_l: float
     bertscore_f1: float
     judge: JudgeResult
